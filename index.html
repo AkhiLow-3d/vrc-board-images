@@ -1,24 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>vrc-board-images</title>
-  <style>
-    body { font-family: sans-serif; background: #111; color: #eee; padding: 1em; }
-    h2 { color: #9cf; }
-    a { color: #8df; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
+<meta charset="UTF-8">
+<title>vrc-board-images</title>
+<style>
+  body { font-family: sans-serif; background: #111; color: #eee; padding: 1em; }
+  h2 { color: #9cf; }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1em;
+  }
+  .item {
+    background: #222;
+    border-radius: 8px;
+    padding: 0.5em;
+    text-align: center;
+    transition: 0.2s;
+  }
+  .item:hover {
+    background: #333;
+    transform: scale(1.02);
+  }
+  img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  a {
+    display: block;
+    color: #8df;
+    margin-top: 0.5em;
+    text-decoration: none;
+  }
+  a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
-  <h2>vrc-board-images</h2>
-  <p>右クリック → 「リンクのコピー」でURLを取得できます。</p>
-  <ul>
-    <li><a href="slide1.png" target="_blank">slide1.png</a></li>
-    <li><a href="slide2.png" target="_blank">slide2.png</a></li>
-    <li><a href="slide3.png" target="_blank">slide3.png</a></li>
-    <li><a href="math.png" target="_blank">math.png</a></li>
-    <li><a href="Graduation.png" target="_blank">Graduation.png</a></li>
-  </ul>
+<h2>vrc-board-images</h2>
+<p>右クリック → 「リンクのコピー」でURLを取得できます。</p>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+  async function loadImages() {
+    const res = await fetch("https://api.github.com/repos/AkhiLow-3d/vrc-board-images/contents/");
+    const files = await res.json();
+    const gallery = document.getElementById("gallery");
+
+    files
+      .filter(f => f.name.match(/\.(png|jpg|jpeg|gif)$/i))
+      .forEach(f => {
+        const url = `https://akhilow-3d.github.io/vrc-board-images/${f.name}`;
+        const item = document.createElement("div");
+        item.className = "item";
+        item.innerHTML = `
+          <a href="${url}" target="_blank">
+            <img src="${url}" alt="${f.name}">
+            <span>${f.name}</span>
+          </a>
+        `;
+        gallery.appendChild(item);
+      });
+  }
+  loadImages();
+</script>
 </body>
 </html>
