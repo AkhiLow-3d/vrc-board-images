@@ -5,7 +5,8 @@
 <title>vrc-board-images</title>
 <style>
   body { font-family: sans-serif; background: #111; color: #eee; padding: 1em; }
-  h2 { color: #9cf; }
+  h1 { color: #9cf; }
+  h2 { color: #9cf; margin-top: 1.5em; border-bottom: 1px solid #333; padding-bottom: 0.2em; }
   .gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -18,53 +19,56 @@
     text-align: center;
     transition: 0.2s;
   }
-  .item:hover {
-    background: #333;
-    transform: scale(1.02);
-  }
+  .item:hover { background: #333; transform: scale(1.02); }
   img {
     width: 100%;
     height: 150px;
     object-fit: cover;
     border-radius: 6px;
   }
-  a {
-    display: block;
-    color: #8df;
-    margin-top: 0.5em;
-    text-decoration: none;
-  }
+  a { color: #8df; text-decoration: none; }
   a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<h2>vrc-board-images</h2>
+<h1>📁 vrc-board-images</h1>
 <p>右クリック → 「リンクのコピー」でURLを取得できます。</p>
-
-<div class="gallery" id="gallery"></div>
+<div id="content"></div>
 
 <script>
-  async function loadImages() {
-    const res = await fetch("https://api.github.com/repos/AkhiLow-3d/vrc-board-images/contents/");
-    const files = await res.json();
-    const gallery = document.getElementById("gallery");
+async function loadFolder(path = "", title = "root") {
+  const res = await fetch(`https://api.github.com/repos/AkhiLow-3d/vrc-board-images/contents/${path}`);
+  const files = await res.json();
+  const content = document.getElementById("content");
 
-    files
-      .filter(f => f.name.match(/\.(png|jpg|jpeg|gif)$/i))
-      .forEach(f => {
-        const url = `https://akhilow-3d.github.io/vrc-board-images/${f.name}`;
-        const item = document.createElement("div");
-        item.className = "item";
-        item.innerHTML = `
-          <a href="${url}" target="_blank">
-            <img src="${url}" alt="${f.name}">
-            <span>${f.name}</span>
-          </a>
-        `;
-        gallery.appendChild(item);
-      });
+  // 見出し（フォルダタイトル）
+  const h2 = document.createElement("h2");
+  h2.textContent = path ? `📂 ${path}` : "📂 root";
+  content.appendChild(h2);
+
+  const gallery = document.createElement("div");
+  gallery.className = "gallery";
+  content.appendChild(gallery);
+
+  // 画像またはサブフォルダ
+  for (const f of files) {
+    if (f.type === "dir") {
+      await loadFolder(f.path, f.name); // サブフォルダも再帰的に処理
+    } else if (f.name.match(/\.(png|jpg|jpeg|gif)$/i)) {
+      const url = `https://akhilow-3d.github.io/vrc-board-images/${f.path}`;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <a href="${url}" target="_blank">
+          <img src="${url}" alt="${f.name}">
+          <span>${f.name}</span>
+        </a>`;
+      gallery.appendChild(div);
+    }
   }
-  loadImages();
+}
+
+loadFolder();
 </script>
 </body>
 </html>
